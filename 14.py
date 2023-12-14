@@ -12,8 +12,6 @@ def transpose(lines: List[str]) -> List[str]:
             out[i] += lines[j][i]
     return out
 
-def rotate_lines(lines: List[str]) -> List[str]:
-
 
 def get_weight_of_line(in_line: str) -> int:
     total_weight = 0
@@ -42,7 +40,7 @@ def get_weight_of_line(in_line: str) -> int:
     num_O_seen = 0
     return total_weight
 
-def simulate_line(in_line: str) -> str:
+def tilt_up(in_line: str) -> str:
     line_len = len(in_line)
     # scan the line, resetting position to every blocker we see
     new_line = ''
@@ -64,10 +62,17 @@ def simulate_line(in_line: str) -> str:
     num_O_seen = 0
     return new_line
 
+def rotate_right(lines: List[str]) -> List[str]:
+    # Transpose the rows and columns using zip
+    rotated_rectangle = list(map(''.join, zip(*lines[::-1])))
+    return rotated_rectangle
+
 def do_cycle(in_lines: List[str]):
     for _ in range(4):
         in_lines = transpose(in_lines)
-        in_lines = [simulate_line(l) for l in in_lines]
+        in_lines = [tilt_up(l) for l in in_lines]
+        in_lines = transpose(in_lines)
+        in_lines = rotate_right(in_lines)
     return in_lines
 
 
@@ -80,8 +85,7 @@ def p1(input: List[str]) -> int:
     #return 0
 
 def p2(input: List[str]) -> int:
-    lines = transpose(input)
-    for l in do_cycle(lines):
+    for l in do_cycle(input):
         print(l)
     return 0
 
