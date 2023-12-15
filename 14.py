@@ -2,8 +2,10 @@ import time
 from typing import Dict, List, Tuple
 import re
 import os
+import functools
 
-def transpose(lines: List[str]) -> List[str]:
+@functools.cache
+def transpose(lines) -> List[str]:
     out = []
     for _ in range(len(lines[0])):
         out.append("")
@@ -40,6 +42,7 @@ def get_weight_of_line(in_line: str) -> int:
     num_O_seen = 0
     return total_weight
 
+@functools.cache
 def tilt_up(in_line: str) -> str:
     line_len = len(in_line)
     # scan the line, resetting position to every blocker we see
@@ -62,36 +65,57 @@ def tilt_up(in_line: str) -> str:
     num_O_seen = 0
     return new_line
 
-def rotate_right(lines: List[str]) -> List[str]:
+@functools.cache
+def rotate_right(lines) -> List[str]:
     # Transpose the rows and columns using zip
-    rotated_rectangle = list(map(''.join, zip(*lines[::-1])))
-    return rotated_rectangle
+    new_lines = []
+    line_len = len(lines)
+    for _ in range(line_len):
+        new_lines.append("")
+    for i in range(line_len):
+        i_idx = line_len-i-1
+        for j in range(len(lines[i_idx])):
+            new_lines[j] += lines[i_idx][j]
+    return new_lines
 
+@functools.cache
 def do_cycle(in_lines: List[str]):
+    lines = in_lines
     for _ in range(4):
-        in_lines = transpose(in_lines)
-        in_lines = [tilt_up(l) for l in in_lines]
-        in_lines = transpose(in_lines)
-        in_lines = rotate_right(in_lines)
-    return in_lines
+        lines = transpose(tuple(lines))
+        lines = tuple([tilt_up(l) for l in lines])
+        lines = tuple(transpose(lines))
+        lines = tuple(rotate_right(lines))
+    return lines
 
 
 def p1(input: List[str]) -> int:
     # step 1: transpose the args
-    rows = transpose(input)
+    rows = transpose(tuple(input))
     total = sum([get_weight_of_line(r) for r in rows])
     return total
     #print(get_weight_of_line(rows[0]))
     #return 0
 
-def p2(input: List[str]) -> int:
-    for l in do_cycle(input):
-        print(l)
-    return 0
+def calc_weight(lines) -> int:
+    height = len(lines)
+    total = 0
+    for i, l in enumerate(lines):
+        row_sum =  sum([1 if ch=='O' else 0 for ch in l]) * (height - i)
+        total += row_sum
+    return total
 
+
+def p2(input: List[str]) -> int:
+    lines = input
+    for i in range(1000000000):
+        lines = do_cycle(tuple(lines))
+    tot = calc_weight(lines)
+
+    return tot
 
 def main():
-    with open("in14_2.txt", "r") as f:
+    with open("in14.txt", "r") as f:
         lines = [l.strip('\n') for l in f.readlines()]
         t1 = time.time()
         print(f"part 1: {p1(lines)}")
