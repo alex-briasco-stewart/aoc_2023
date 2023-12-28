@@ -2,10 +2,20 @@ import time
 from typing import Dict, List, Tuple
 import re
 import os
+import networkx as nx
 
 
 def p1(input: List[str]) -> int:
-    return 0
+    G = nx.Graph()
+    [G.add_node(i.split(": ")[0]) for i in input]
+    for l in input:
+        node, edges = l.split(": ")
+        edges = edges.split(" ")
+        for e in edges:
+            G.add_edge(node, e)
+
+    _, parts = nx.algorithms.connectivity.stoerwagner.stoer_wagner(G)
+    return len(parts[0]) * len(parts[1])
 
 def p2(input: List[str]) -> int:
     return 0
